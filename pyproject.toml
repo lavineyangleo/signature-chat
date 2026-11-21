@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "signature-chat"
+version = "0.1.0"
+description = "A single-chat signature design studio with transparent PNG exports"
+readme = "README.en.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{name = "Signature Chat contributors"}]
+dependencies = ["Pillow>=10.4,<14"]
+
+[project.scripts]
+signature-chat = "signature_chat.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+signature_chat = ["web/*", "web/assets/*"]

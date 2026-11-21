@@ -1,0 +1,115 @@
+[中文](README.md) | [English](README.en.md)
+
+<p align="center"><img src="assets/logo.svg" width="80" alt="Signature Chat"></p>
+<h1 align="center">Signature Chat</h1>
+<p align="center">一个对话框，设计你的签名。所有下载均为透明 PNG。</p>
+
+Vue 3 + Vite 前端，Python 本地 API。输入姓名和风格，继续用自然语言修改，结果在同一对话里展示。无需安装 Codex 或任何技能目录。
+
+![真实界面操作演示](assets/demo.gif)
+
+动图录制的是实际 Vue 页面：输入 `/example` 打开仓库中的真实生成样例，再开始新对话。它不是实时生图录屏，不展示虚构的接口调用。
+
+## 功能
+
+- 单对话框：姓名、语言和风格均通过文字描述，支持多轮修改。
+- 三种默认方向：简洁易读、回环花式、利落速签，也可指定单款。
+- **透明 PNG 导出**：请求透明背景，并在本地提取黑色笔迹；只有包含真实透明像素的 RGBA PNG 才可下载。
+- 棋盘格仅用于预览，不会进入导出文件。
+- SQLite 保存对话、状态和真实尺寸；刷新后继续查看。
+- 相同请求编号不会重复调用；超时和失败不自动重试，程序重启后标记中断任务。
+- 凭证仅来自服务端环境变量，不发送到浏览器、不写入数据库或源码。
+
+## 运行环境
+
+Python 3.12+、Node.js 22.12+、npm。已在 Windows、Python 3.12、Node 24 和 Edge 上验证本地构建与交互。其他操作系统的运行情况以实际测试为准。
+
+## 快速开始
+
+在项目根目录运行。Windows PowerShell：
+
+```powershell
+py -3.12 -m venv venv-3.12
+npm --prefix frontend ci
+npm --prefix frontend run build
+& .\venv-3.12\Scripts\python.exe -m pip install -e .
+$env:C2A_API_KEY = 'YOUR_API_KEY'
+& .\venv-3.12\Scripts\signature-chat.exe serve
+```
+
+macOS / Linux 的对应命令（未在本次本机验收中实测）：
+
+```bash
+python3.12 -m venv venv-3.12
+npm --prefix frontend ci
+npm --prefix frontend run build
+venv-3.12/bin/python -m pip install -e .
+export C2A_API_KEY='YOUR_API_KEY'
+venv-3.12/bin/signature-chat serve
+```
+
+打开 <http://127.0.0.1:8780>。首次不配置密钥也能查看 `/example` 真实样例和测试透明下载；实际生成需要有效凭证。不要把密钥写入前端或提交到 Git。
+
+默认接口为 `https://c2a.jiaopilot.com/v1/responses`，图像工具模型为 `gpt-image-2`，顶层模型默认 `gpt-6.1-sol`。这不是官方 OpenAI API 端点；需使用该服务的凭证，价格和可用性由服务端决定。
+
+## 使用
+
+输入“给 Lavine 设计一个大回环的英文签名”，再输入“收笔短一点，只保留一款”。按 Enter 发送，Shift + Enter 换行。
+
+- `/example`：查看本地真实样例，不发起付费请求。
+- `/new`：开始新对话，旧记录仍保留在本机数据库。
+- 点击“下载透明 PNG”获取原尺寸透明结果。
+
+文字描述会作为上下文重新生成图片，并非精确编辑上一张图片。程序提供艺术签名设计，不提供电子签章或身份认证。
+
+## 透明导出
+
+算法针对**黑色笔迹、白底或透明底**：用反向亮度估计笔迹透明度，再与已有 alpha 相乘，保留细线抗锯齿，去除近白噪点，最终 RGB 为黑色。导出前检查透明像素和有效笔迹；不满足则不导出。
+
+这不是通用抠图：彩色签名会转黑，照片、阴影和纹理不适用。界面提示词因此固定要求黑色笔迹和纯净背景。
+
+也可以离线处理已有黑白签名图：
+
+```bash
+signature-chat transparent input.png output-transparent.png
+```
+
+输入不会被覆盖，输出必须是新 `.png` 文件。
+
+![六姓名三种风格透明对照](assets/styles-transparent.png)
+
+[中英文对照透明原图](assets/bilingual-transparent.png) · [素材来源说明](assets/PROVENANCE.md)
+
+## 配置与数据
+
+```bash
+signature-chat serve --port 8780 --data-dir ./data --model gpt-image-2
+```
+
+支持选择 `gpt-image-2.5-flare`、`gpt-image-2.5-sunburst`。这些选项不代表本仓库已对其逐个进行调用测试。`C2A_MAIN_MODEL` 可覆盖顶层模型。
+
+默认数据位于用户主目录的 `.signature-chat/`，包含数据库和透明图片。网页仅在 localStorage 保存对话编号和未确认提交的文本，绝不保存密钥。请求内容会发送给 C2A。连接只监听 `127.0.0.1`；此版本用于单用户本地运行，没有公网账户体系。
+
+网络读取超时30秒，整体读取预算180秒，并在分块读取之间检查，因此可能多等待一个读取周期。中断可能已产生费用；不会自动重发。
+
+## 开发与验证
+
+```bash
+# 终端1：Python API
+signature-chat serve
+# 终端2：Vue开发服务器（代理到8780）
+npm --prefix frontend run dev
+# 离线测试与构建
+python -m unittest discover -s tests -v
+npm --prefix frontend run build
+python -m pip install build
+python -m build
+```
+
+前端源码位于 `frontend/src/`。Vite 生产输出位于 `src/signature_chat/web/`，随 wheel 打包；从源码安装前先构建前端。后端按 `core/`、`infra/`、`services/` 分层。CI 检查 Vue 构建、离线测试和 Python 打包。
+
+本地离线验收不等于新适配器的付费联网端到端验证。展示图片来自此前真实的 C2A 生成结果；当前实现另以真实历史响应做离线回放检查，不伪造模型结果。
+
+## 许可证
+
+项目代码与原创 SVG 标识采用 [MIT](LICENSE)。展示图是用户指定姓名的 AI 原创设计示例，经本地透明处理，不是相关人士本人真实签名或背书；中英姓名仅为排版对照。依赖分别保留其上游许可证，C2A 为外部服务。

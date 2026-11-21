@@ -1,0 +1,115 @@
+[中文](README.md) | [English](README.en.md)
+
+<p align="center"><img src="assets/logo.svg" width="80" alt="Signature Chat"></p>
+<h1 align="center">Signature Chat</h1>
+<p align="center">One conversation for signature design. Every download is a transparent PNG.</p>
+
+A Vue 3 + Vite frontend with a local Python API. Describe names and styles, refine them conversationally, and view the results in the same chat. No Codex installation or skill directory is required.
+
+![Actual UI recording](assets/demo.gif)
+
+The animation records the actual Vue application opening a repository-owned, genuinely generated example with `/example`, then starting a new conversation. It is not a live image-generation recording and does not fabricate API calls.
+
+## Features
+
+- One text box for names, languages, style requirements, and follow-up changes.
+- Three default directions: restrained and legible, ornamental loops, and angular fast autographs; single styles are also supported.
+- **Transparent PNG downloads**: request transparency, extract black ink locally, and export only RGBA PNGs with verified transparent pixels.
+- The checkerboard is a preview background and is never exported.
+- SQLite stores conversations, statuses, and actual dimensions; refresh to resume viewing.
+- Request IDs prevent duplicate calls. No automatic generation retries. Interrupted jobs are marked on restart.
+- Credentials stay in the server environment, never in the browser, database, or source.
+
+## Requirements
+
+Python 3.12+, Node.js 22.12+, and npm. Local builds and interactions have been checked on Windows with Python 3.12, Node 24, and Edge. Other operating systems require their own validation.
+
+## Quick start
+
+Run from the repository root. Windows PowerShell:
+
+```powershell
+py -3.12 -m venv venv-3.12
+npm --prefix frontend ci
+npm --prefix frontend run build
+& .\venv-3.12\Scripts\python.exe -m pip install -e .
+$env:C2A_API_KEY = 'YOUR_API_KEY'
+& .\venv-3.12\Scripts\signature-chat.exe serve
+```
+
+Equivalent macOS / Linux commands (not executed during this local validation):
+
+```bash
+python3.12 -m venv venv-3.12
+npm --prefix frontend ci
+npm --prefix frontend run build
+venv-3.12/bin/python -m pip install -e .
+export C2A_API_KEY='YOUR_API_KEY'
+venv-3.12/bin/signature-chat serve
+```
+
+Open <http://127.0.0.1:8780>. Without a key, `/example` still displays the real example and lets you check transparent downloads. Generation needs valid credentials. Never put keys in the frontend or Git.
+
+The endpoint is `https://c2a.jiaopilot.com/v1/responses`; the image tool defaults to `gpt-image-2`, and the top-level model defaults to `gpt-6.1-sol`. This is not an official OpenAI API endpoint. Credentials, prices, and availability are controlled by that service.
+
+## Usage
+
+Ask for “a large-loop English signature for Lavine,” then “shorten the finishing stroke and show only one design.” Enter sends; Shift + Enter inserts a newline.
+
+- `/example`: show a real local example without a paid request.
+- `/new`: start a new conversation; older records remain in the local database.
+- “下载透明 PNG”: download the transparent result at its actual dimensions.
+
+Follow-up text produces a new image from the accumulated instructions, not a precise pixel edit. This is an artistic lettering tool, not a digital-signature or identity-verification system.
+
+## Transparent export
+
+For **black ink on a white or transparent canvas**, the matte estimates ink opacity from inverse luminance and multiplies it by the existing alpha. It preserves soft stroke edges, removes near-white noise, and sets RGB to black. Export checks require transparent pixels and meaningful ink; otherwise no output is delivered.
+
+This is not general background removal: colored ink becomes black, and photos, shadows, or textured backgrounds are unsupported. Generation instructions therefore require monochrome ink and a clean background.
+
+Offline conversion is available:
+
+```bash
+signature-chat transparent input.png output-transparent.png
+```
+
+The source is preserved and the output must be a new `.png` file.
+
+![Six names, three styles, transparent comparison](assets/styles-transparent.png)
+
+[Transparent bilingual example](assets/bilingual-transparent.png) · [Asset provenance](assets/PROVENANCE.md)
+
+## Configuration and data
+
+```bash
+signature-chat serve --port 8780 --data-dir ./data --model gpt-image-2
+```
+
+`gpt-image-2.5-flare` and `gpt-image-2.5-sunburst` are selectable; their presence does not imply individual live testing in this repository. Override the top-level model with `C2A_MAIN_MODEL`.
+
+Default storage is `.signature-chat/` under the current user's home, containing SQLite and transparent images. Browser localStorage keeps only the conversation ID and unresolved submission text, never credentials. Prompts are sent to C2A. The server listens on `127.0.0.1` for local single-user use; public account management is not included.
+
+Socket reads time out after 30 seconds. A 180-second overall budget is checked between chunks, so the last read may add one timeout interval. Interrupted requests may still incur charges; no automatic generation retry occurs.
+
+## Development and validation
+
+```bash
+# Terminal 1: Python API
+signature-chat serve
+# Terminal 2: Vue dev server, proxying to port 8780
+npm --prefix frontend run dev
+# Offline tests and packaging
+python -m unittest discover -s tests -v
+npm --prefix frontend run build
+python -m pip install build
+python -m build
+```
+
+Vue source lives in `frontend/src/`. Vite builds to `src/signature_chat/web/`, included in the wheel; build the frontend before installing from source. Backend layers are `core/`, `infra/`, and `services/`. CI checks the Vue build, offline tests, and Python packages.
+
+Offline validation is not a new paid end-to-end API test. Showcase images came from actual earlier C2A calls; the adapter is additionally checked by replaying a real historical response locally, not by fabricating model output.
+
+## License
+
+Project code and the original SVG mark use [MIT](LICENSE). Showcase images are AI-generated original lettering concepts using user-specified names, processed locally for transparency. They are not authentic celebrity autographs or endorsements; Chinese and English names are layout examples, not translations. Dependencies retain their upstream licenses. C2A is an external service.

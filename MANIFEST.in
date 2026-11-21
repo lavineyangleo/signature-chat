@@ -1,0 +1,5 @@
+include LICENSE README.md README.en.md
+recursive-include frontend *.json *.vue *.js *.css *.html *.svg *.png
+prune frontend/node_modules
+recursive-include assets *.svg *.png *.gif *.md
+recursive-include tests *.py
