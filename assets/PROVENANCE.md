@@ -1,5 +1,8 @@
 # 展示素材 / Showcase provenance
 
+- `illustrated-transparent.png`：2026-11-22 通过一次真实 C2A 请求新生成的 Lavine 四款原创图案签名，1254×1254、原生RGBA透明背景，含萌宠、花植、星月和淡彩兔子。请求模型字段为 `gpt-image-2`；淡彩的RGB和alpha由本地保色流程原样保留。
+- `frontend/public/examples/lavine-{pet,botanical,celestial,pastel}.png`：上述真实生成图的四个区域裁切，用于首页。用户提供的第三方参考附件只用于本地风格分析，不包含在本仓库。
+
 - `styles-transparent.png`：本会话真实 C2A 生成的六姓名、三种风格对照图，原始尺寸 1024×1536。
 - `bilingual-transparent.png`：本会话真实 C2A 生成的中英文对照图，原始尺寸 1086×1448。
 - 两图请求的工具模型均为 `gpt-image-2`；请求字段不构成底层模型身份的独立核验。

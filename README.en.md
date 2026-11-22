@@ -13,8 +13,8 @@ The animation records the actual Vue application selecting a real welcome-screen
 ## Features
 
 - One text box for names, languages, style requirements, and follow-up changes.
-- Three default directions: restrained and legible, ornamental loops, and angular fast autographs; single styles are also supported.
-- **Transparent PNG downloads**: request transparency, extract black ink locally, and export only RGBA PNGs with verified transparent pixels.
+- Three lettering directions (legible, ornamental loops, angular fast autographs) plus four illustrated styles: cute pets, botanical details, celestial doodles, and pastel characters.
+- **Transparent PNG downloads**: request transparency, process ink locally or preserve pastel colors, and export only RGBA PNGs with verified transparent pixels.
 - The checkerboard is a preview background and is never exported.
 - SQLite stores conversations, statuses, and actual dimensions; refresh to resume viewing.
 - Request IDs prevent duplicate calls. No automatic generation retries. Interrupted jobs are marked on restart.
@@ -56,7 +56,7 @@ The endpoint is `https://c2a.jiaopilot.com/v1/responses`; the image tool default
 
 Ask for “a large-loop English signature for Lavine,” then “shorten the finishing stroke and show only one design.” Enter sends; Shift + Enter inserts a newline.
 
-The welcome screen includes six real signature examples. Clicking one only fills in editable instructions; it does not generate an image or initiate a charge. Change the name as needed.
+The welcome screen includes ten real signature examples. Clicking one only fills in editable instructions; it does not generate an image or initiate a charge. Change the name as needed.
 
 Type `@` to open the style picker, then type a keyword such as `loop` to filter. Use ↑ / ↓, Enter to select, Esc to dismiss, or click an option. Enter selects without sending while the picker is open. Style instructions are inserted visibly into the message; choosing another style replaces the previous selection.
 
@@ -70,15 +70,23 @@ Follow-up text produces a new image from the accumulated instructions, not a pre
 
 For **black ink on a white or transparent canvas**, the matte estimates ink opacity from inverse luminance and multiplies it by the existing alpha. It preserves soft stroke edges, removes near-white noise, and sets RGB to black. Export checks require transparent pixels and meaningful ink; otherwise no output is delivered.
 
-This is not general background removal: colored ink becomes black, and photos, shadows, or textured backgrounds are unsupported. Generation instructions therefore require monochrome ink and a clean background.
+Selecting the pastel style or explicitly asking for pastel accents enables color-preserving export. Native transparent images keep their RGB and alpha; opaque white images use a near-white removal fallback that retains color fills and reduces white edges. A later “black and white” request switches back to monochrome processing.
+
+This is not general background removal. Photos, shadows, and textured backgrounds are unsupported. Very pale, near-white fills may become transparent in the white-background fallback; native transparent output is preferred.
 
 Offline conversion is available:
 
 ```bash
 signature-chat transparent input.png output-transparent.png
+# Preserve pastel illustration colors
+signature-chat transparent pastel.png pastel-transparent.png --preserve-color
 ```
 
 The source is preserved and the output must be a new `.png` file.
+
+![Illustrated signature styles, transparent](assets/illustrated-transparent.png)
+
+Type `@pet`, `@flower`, `@moon`, or `@pastel` to select an illustrated style. Add instructions such as “replace the kitten with a bunny.” Names and motifs are regenerated from the full text context. Reference photos informed style analysis only; published examples are newly generated original compositions.
 
 ![Six names, three styles, transparent comparison](assets/styles-transparent.png)
 

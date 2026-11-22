@@ -1,6 +1,7 @@
 import threading
 import uuid
 from signature_chat.core.prompt import build_prompt
+from signature_chat.core.styles import design_policy
 from signature_chat.core.transparency import transparent_signature
 from signature_chat.infra.provider import ProviderError
 
@@ -32,7 +33,9 @@ class Studio:
                 raise ValueError('已有签名正在生成，请稍候。')
             if not self.provider.configured:
                 raise ValueError('请设置 C2A_API_KEY 环境变量并重启程序。')
-            prompt = build_prompt([r['message'] for r in rows if r['session'] == session] + [message])
+            messages = [r['message'] for r in rows if r['session'] == session] + [message]
+            prompt = build_prompt(messages)
+            policy = design_policy(messages)
             self.store.add(key, session, message)
             self.active = True
 
@@ -40,7 +43,8 @@ class Studio:
             try:
                 raw = self.provider.generate(prompt)
                 output = self.store.root / 'images' / f'{key}.png'
-                metadata = transparent_signature(raw, output)
+                metadata = transparent_signature(raw, output, preserve_color=policy['preserve_color'])
+                metadata['style'] = policy['style']
                 metadata['requested_model'] = self.provider.model
                 self.store.finish(key, 'success', metadata)
             except ProviderError as exc:

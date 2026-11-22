@@ -18,13 +18,14 @@ def main():
     matte = sub.add_parser('transparent', help='Convert monochrome white-background artwork into transparent PNG')
     matte.add_argument('input', type=Path)
     matte.add_argument('output', type=Path)
+    matte.add_argument('--preserve-color', action='store_true', help='Keep pastel ink and illustration fills')
     args = parser.parse_args()
     if args.command == 'transparent':
         if args.input.resolve() == args.output.resolve() or args.output.exists():
             parser.error('Choose a new output path; existing files are not overwritten.')
         if args.output.suffix.lower() != '.png':
             parser.error('The output must use the .png extension.')
-        metadata = transparent_signature(args.input, args.output)
+        metadata = transparent_signature(args.input, args.output, preserve_color=args.preserve_color)
         print(f"Transparent PNG: {metadata['width']}x{metadata['height']}; RGBA; {metadata['transparent_pixels']} transparent pixels")
     else:
         if not 1 <= args.port <= 65535:

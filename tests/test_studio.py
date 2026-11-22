@@ -5,6 +5,7 @@ import uuid
 from pathlib import Path
 from PIL import Image, ImageChops, ImageStat
 from signature_chat.core.prompt import build_prompt
+from signature_chat.core.styles import design_policy
 from signature_chat.core.transparency import transparent_signature
 from signature_chat.infra.provider import C2AProvider, decode_response, ProviderError
 from signature_chat.infra.store import Store
@@ -15,6 +16,34 @@ SAMPLE = ROOT / 'assets/styles-transparent.png'
 
 
 class TransparentExportTests(unittest.TestCase):
+    def test_real_pastel_native_alpha_and_rgb_survive(self):
+        source = ROOT / 'assets/illustrated-transparent.png'
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / 'color.png'
+            metadata = transparent_signature(source, output, preserve_color=True)
+            self.assertEqual(metadata['processing'], 'color-preserving-alpha-v1')
+            with Image.open(source) as original, Image.open(output) as result:
+                self.assertEqual(original.tobytes(), result.tobytes())
+                red, green, blue, alpha = result.split()
+                self.assertGreater(ImageChops.difference(red, blue).getextrema()[1], 20)
+                self.assertEqual(alpha.getextrema(), (0, 255))
+
+    def test_real_pastel_white_fallback_retains_color(self):
+        with tempfile.TemporaryDirectory() as tmp, Image.open(ROOT / 'assets/illustrated-transparent.png') as ink:
+            white = Image.new('RGBA', ink.size, 'white')
+            white.alpha_composite(ink)
+            source, target = Path(tmp) / 'white.png', Path(tmp) / 'result.png'
+            white.convert('RGB').save(source)
+            transparent_signature(source, target, preserve_color=True)
+            with Image.open(target) as result:
+                red, green, blue, alpha = result.split()
+                self.assertGreater(ImageChops.difference(red, blue).getextrema()[1], 20)
+                self.assertEqual(alpha.getextrema(), (0, 255))
+                recomposed = Image.new('RGBA', result.size, 'white')
+                recomposed.alpha_composite(result)
+                error = ImageStat.Stat(ImageChops.difference(recomposed.convert('RGB'), white.convert('RGB')))
+                self.assertLess(max(error.mean), 1)
+
     def test_real_showcase_has_actual_alpha(self):
         for name in ('styles-transparent.png', 'bilingual-transparent.png'):
             with Image.open(ROOT / 'assets' / name) as image:
@@ -45,6 +74,17 @@ class TransparentExportTests(unittest.TestCase):
 
 
 class ConversationTests(unittest.TestCase):
+    def test_illustrated_styles_and_color_override(self):
+        pet = build_prompt(['给 Lavine 设计签名【风格：萌宠线描，小猫融入笔画】'])
+        self.assertIn('animal line-art', pet)
+        self.assertNotIn('Default comparison:', pet)
+        pastel = ['给 Lavine 设计签名【风格：淡彩萌系，保留粉色】']
+        self.assertTrue(design_policy(pastel)['preserve_color'])
+        self.assertNotIn('BLACK INK ONLY', build_prompt(pastel))
+        self.assertFalse(design_policy(pastel + ['改为黑白'])['preserve_color'])
+        self.assertFalse(design_policy(pastel + ['【风格：简洁易读，只生成这一款】'])['preserve_color'])
+        self.assertFalse(design_policy(pastel + ['【风格：同一姓名分别生成简洁易读、回环花式、利落速签三款对照】'])['illustrated'])
+
     def test_context_preserves_exact_name_and_change(self):
         prompt = build_prompt(['给 Lavine 设计签名', '只保留一款，收笔短一点'])
         self.assertIn('Lavine', prompt)

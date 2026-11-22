@@ -126,7 +126,7 @@ async function chooseStyle(style) {
 
 async function chooseExample(example) {
   const style = signatureStyles.find(s => s.id === example.style)
-  input.value = `请为 ${example.name} 设计${example.language}签名。${styleText(style)}`
+  input.value = `请为 ${example.name} 设计${example.language}签名。${styleText(style)}${example.motif ? '图案：' + example.motif + '。' : ''}`
   mention.value = null
   hint.value = '已填入案例要求，可修改姓名后发送；输入 @ 可以更换或补充风格。'
   await nextTick()

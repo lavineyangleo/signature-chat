@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "signature-chat"
-version = "0.1.1"
+version = "0.2.0"
 description = "A single-chat signature design studio with transparent PNG exports"
 readme = "README.en.md"
 requires-python = ">=3.12"
