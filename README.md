@@ -37,21 +37,6 @@ $env:C2A_API_KEY = 'YOUR_API_KEY'
 & .\venv-3.12\Scripts\signature-chat.exe serve
 ```
 
-macOS / Linux 的对应命令（未在本次本机验收中实测）：
-
-```bash
-python3.12 -m venv venv-3.12
-npm --prefix frontend ci
-npm --prefix frontend run build
-venv-3.12/bin/python -m pip install -e .
-export C2A_API_KEY='YOUR_API_KEY'
-venv-3.12/bin/signature-chat serve
-```
-
-打开 <http://127.0.0.1:8780>。首次不配置密钥也能查看 `/example` 真实样例和测试透明下载；实际生成需要有效凭证。不要把密钥写入前端或提交到 Git。
-
-默认接口为 `https://c2a.jiaopilot.com/v1/responses`，图像工具模型为 `gpt-image-2`，顶层模型默认 `gpt-6.1-sol`。这不是官方 OpenAI API 端点；需使用该服务的凭证，价格和可用性由服务端决定。
-
 ## 使用
 
 输入“给 Lavine 设计一个大回环的英文签名”，再输入“收笔短一点，只保留一款”。按 Enter 发送，Shift + Enter 换行。

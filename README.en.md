@@ -37,21 +37,6 @@ $env:C2A_API_KEY = 'YOUR_API_KEY'
 & .\venv-3.12\Scripts\signature-chat.exe serve
 ```
 
-Equivalent macOS / Linux commands (not executed during this local validation):
-
-```bash
-python3.12 -m venv venv-3.12
-npm --prefix frontend ci
-npm --prefix frontend run build
-venv-3.12/bin/python -m pip install -e .
-export C2A_API_KEY='YOUR_API_KEY'
-venv-3.12/bin/signature-chat serve
-```
-
-Open <http://127.0.0.1:8780>. Without a key, `/example` still displays the real example and lets you check transparent downloads. Generation needs valid credentials. Never put keys in the frontend or Git.
-
-The endpoint is `https://c2a.jiaopilot.com/v1/responses`; the image tool defaults to `gpt-image-2`, and the top-level model defaults to `gpt-6.1-sol`. This is not an official OpenAI API endpoint. Credentials, prices, and availability are controlled by that service.
-
 ## Usage
 
 Ask for “a large-loop English signature for Lavine,” then “shorten the finishing stroke and show only one design.” Enter sends; Shift + Enter inserts a newline.
