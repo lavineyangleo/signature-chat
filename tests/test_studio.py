@@ -85,6 +85,18 @@ class ConversationTests(unittest.TestCase):
         self.assertFalse(design_policy(pastel + ['【风格：简洁易读，只生成这一款】'])['preserve_color'])
         self.assertFalse(design_policy(pastel + ['【风格：同一姓名分别生成简洁易读、回环花式、利落速签三款对照】'])['illustrated'])
 
+    def test_short_titles_expand_style_rules(self):
+        for style in ('简洁易读', '回环花式', '利落速签', '萌宠线描', '花植点缀', '星月童话', '淡彩萌系', '三款对照'):
+            with self.subTest(style=style):
+                messages = [f'Robert 【{style}】']
+                policy = design_policy(messages)
+                self.assertEqual(policy['style'], style)
+                self.assertTrue(policy['guidance'])
+                self.assertIn(policy['guidance'], build_prompt(messages))
+                self.assertNotIn('Default comparison:', build_prompt(messages))
+        self.assertIn('Create one signature only.', build_prompt(['苏秋丹【回环花式】']))
+        self.assertIn('Create three clearly different signatures', build_prompt(['武晖栋【三款对照】']))
+
     def test_context_preserves_exact_name_and_change(self):
         prompt = build_prompt(['给 Lavine 设计签名', '只保留一款，收笔短一点'])
         self.assertIn('Lavine', prompt)

@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { request } from './api.js'
 import StyleMenu from './components/StyleMenu.vue'
 import ExampleGallery from './components/ExampleGallery.vue'
-import { signatureStyles, styleText } from './styles.js'
+import { signatureStyles, styleText, stripStyle } from './styles.js'
 
 const input = ref('')
 const turns = ref([])
@@ -77,6 +77,7 @@ async function send() {
     await bottom()
     return
   }
+  if (!stripStyle(text).trim()) { hint.value = '请填写需要设计签名的姓名'; return }
   sending.value = true
   hint.value = '正在提交…'
   // Reuse an unresolved request ID when the user deliberately resubmits the same text.
@@ -112,12 +113,13 @@ async function chooseStyle(style) {
   const range = mention.value
   if (!range) return
   const insertion = styleText(style) + ' '
-  const prefix = input.value.slice(0, range.start).replace(/【风格：[^】]*】\s*/gu, '')
-  const suffix = input.value.slice(range.end).replace(/【风格：[^】]*】\s*/gu, '')
+  const prefix = stripStyle(input.value.slice(0, range.start))
+  const suffix = stripStyle(input.value.slice(range.end))
   const result = prefix + insertion + suffix
   if (result.length > 2000) { hint.value = '加入风格后超过2000字，请先精简内容。'; return }
   input.value = result
   mention.value = null
+  hint.value = `已选择${style.name}，请填写姓名或补充要求`
   await nextTick()
   composer.value.focus()
   const caret = prefix.length + insertion.length
@@ -126,9 +128,12 @@ async function chooseStyle(style) {
 
 async function chooseExample(example) {
   const style = signatureStyles.find(s => s.id === example.style)
-  input.value = `请为 ${example.name} 设计${example.language}签名。${styleText(style)}${example.motif ? '图案：' + example.motif + '。' : ''}`
+  const content = stripStyle(input.value).trim()
+  const result = [content, styleText(style)].filter(Boolean).join(' ')
+  if (result.length > 2000) { hint.value = '加入风格后超过2000字，请先精简内容。'; return }
+  input.value = result
   mention.value = null
-  hint.value = '已填入案例要求，可修改姓名后发送；输入 @ 可以更换或补充风格。'
+  hint.value = `已选择${style.name}，请填写姓名或补充要求`
   await nextTick()
   composer.value.focus()
   composer.value.setSelectionRange(input.value.length, input.value.length)

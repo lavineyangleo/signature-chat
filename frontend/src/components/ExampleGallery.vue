@@ -18,5 +18,5 @@ const groups = [
     </button>
     </div>
   </section>
-  <p class="example-caption">真实生成的原创设计案例 · 点击填入要求，可修改姓名</p>
+  <p class="example-caption">真实生成的原创设计案例 · 点击选择模式，再填写姓名</p>
 </template>

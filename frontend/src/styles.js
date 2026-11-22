@@ -23,5 +23,9 @@ export const signatureExamples = [
 ]
 
 export function styleText(style) {
-  return `【风格：${style.instruction}】`
+  return `【${style.name}】`
+}
+
+export function stripStyle(text) {
+  return text.replace(/【风格：[^】]*】\s*/gu, '').replace(/【([^】]+)】\s*/gu, (marker, name) => signatureStyles.some(style => style.name === name) ? '' : marker)
 }

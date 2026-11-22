@@ -8,7 +8,7 @@ A Vue 3 + Vite frontend with a local Python API. Describe names and styles, refi
 
 ![Actual UI recording](assets/demo.gif)
 
-The animation records the actual Vue application selecting a real welcome-screen example, using the `@` style picker, and opening the transparent showcase with `/example`. It is not a live image-generation recording and does not fabricate API calls.
+The animation records the actual Vue application selecting a real welcome-screen example, using the `@` style picker, and entering a name. It is not a live image-generation recording and does not fabricate API calls.
 
 ## Features
 
@@ -56,9 +56,9 @@ The endpoint is `https://c2a.jiaopilot.com/v1/responses`; the image tool default
 
 Ask for “a large-loop English signature for Lavine,” then “shorten the finishing stroke and show only one design.” Enter sends; Shift + Enter inserts a newline.
 
-The welcome screen includes ten real signature examples. Clicking one only fills in editable instructions; it does not generate an image or initiate a charge. Change the name as needed.
+The welcome screen includes ten real signature examples. Clicking one inserts only a short style title, preserving your name and custom text. Detailed drawing rules are expanded on the server. A title alone prompts you to enter a name without generating or charging.
 
-Type `@` to open the style picker, then type a keyword such as `loop` to filter. Use ↑ / ↓, Enter to select, Esc to dismiss, or click an option. Enter selects without sending while the picker is open. Style instructions are inserted visibly into the message; choosing another style replaces the previous selection.
+Type `@` to open the style picker, then type a keyword such as `loop` to filter. Use ↑ / ↓, Enter to select, Esc to dismiss, or click an option. Enter selects without sending while the picker is open. Only the style title is inserted into the message; choosing another style replaces the previous selection.
 
 - `/example`: show a real local example without a paid request.
 - `/new`: start a new conversation; older records remain in the local database.

@@ -19,7 +19,7 @@ def build_prompt(messages: list[str]) -> str:
         'Transparent background. If transparency is unavailable, use absolute pure white. No textures, shadows, opaque panels or checkerboard pixels.',
         'Default aesthetic: fine fountain-pen strokes, natural pressure variation, connected cursive, airy horizontal composition, graceful elliptical loops and long terminal hairlines.',
         ('Create one integrated illustrated signature, not a three-style specimen sheet. ' + policy['guidance']
-         if policy['illustrated'] else 'Default comparison: three clearly different styles (legible restrained everyday handwriting; expansive oval-loop ornamental cursive; sharp compressed forward-slanted fast autograph). Use one style if the user asks for one.'),
+         if policy['illustrated'] else policy['guidance'] or 'Default comparison: three clearly different styles (legible restrained everyday handwriting; expansive oval-loop ornamental cursive; sharp compressed forward-slanted fast autograph). Use one style if the user asks for one.'),
         'Chinese uses genuine running-script stroke structures; English stays readable. Only use the languages and names actually provided. A new name replaces earlier names unless comparison is requested.',
         ('Show the name woven into the requested motif; no extra captions or typeset name labels. Motifs share strokes with lettering. Keep the name readable and use an original character design.'
          if policy['illustrated'] else 'Show signatures and small name labels only, with generous spacing.'),
